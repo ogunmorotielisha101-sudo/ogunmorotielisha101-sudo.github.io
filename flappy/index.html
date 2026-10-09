@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <title>Flappy Bird</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <script src="https://libtl.com/sdk.js" data-zone="11994091" data-sdk="show_11994091"></script>
     <script src="../games/hub.js"></script>
     <style>
       html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: #7fd3f7; }
@@ -154,19 +154,15 @@
 
         // ---------- Input ----------
         // ---------- Ads ----------
-        var ADSGRAM_REWARD_BLOCK = "52856", ADSGRAM_INTER_BLOCK = "int-52857";
-        try { if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); if (Telegram.WebApp.disableVerticalSwipes) Telegram.WebApp.disableVerticalSwipes(); } } catch (e) {}
-        function makeAdsgram() {
+        // Monetag Telegram Mini App SDK (zone 11994091)
+        function makeMonetag() {
           var inTg = false; try { inTg = !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData); } catch (e) {}
-          if (!inTg || !window.Adsgram || ADSGRAM_REWARD_BLOCK.indexOf("REPLACE") === 0) return null;
-          var rc = null, ic = null;
-          try { rc = window.Adsgram.init({ blockId: ADSGRAM_REWARD_BLOCK }); } catch (e) {}
-          try { if (ADSGRAM_INTER_BLOCK.indexOf("REPLACE") !== 0) ic = window.Adsgram.init({ blockId: ADSGRAM_INTER_BLOCK }); } catch (e) {}
-          if (!rc) return null;
+          if (!inTg) return null;
+          function fn() { return typeof window.show_11994091 === "function" ? window.show_11994091 : null; }
           return {
             rewardedReady: function () { return true; },
-            showRewarded: function () { rc.show().then(function (r) { if (r && r.done) window.onRewarded(); }).catch(function () { window.onRewardFailed(); }); },
-            showInterstitial: function () { if (ic) ic.show().catch(function () {}); }
+            showRewarded: function () { var f = fn(); if (!f) { window.onRewardFailed(); return; } f().then(function () { window.onRewarded(); }).catch(function () { window.onRewardFailed(); }); },
+            showInterstitial: function () { try { if (window.Hub) { Hub.interstitial(); return; } var f = fn(); if (f) f({ type: "inApp", inAppSettings: { frequency: 1, capping: 0.1, interval: 90, timeout: 0, everyPage: false } }).catch(function () {}); } catch (e) {} }
           };
         }
         var SMARTLINK = "https://uplcm.com/4/11989190";
@@ -179,7 +175,7 @@
           return { rewardedReady: function () { return true; }, showRewarded: smartReward, showInterstitial: function () {} };
         }
         var IN_TG = false; try { IN_TG = !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData); } catch (e) {}
-        var ADS = window.AndroidAds || makeAdsgram() || (IN_TG ? null : makeSmartlink()), deaths = 0, doubled = false, rewardBtn = null;
+        var ADS = window.AndroidAds || makeMonetag() || (IN_TG ? null : makeSmartlink()), deaths = 0, doubled = false, rewardBtn = null;
         function rewardReady() { try { return !!(ADS && ADS.rewardedReady()); } catch (e) { return false; } }
         window.onRewarded = function () { if (!doubled) { var add = runCoins > 0 ? runCoins : 10; save.coins += add; runCoins += add; doubled = true; persist(); sfx.score(); try { if (window.Hub) Hub.submit("flappy", 0, add); } catch (e) {} } };
         window.onRewardFailed = function () { shopMsg = "No ad right now, try later"; shopMsgT = 1.6; };
