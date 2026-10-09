@@ -26,7 +26,7 @@
     // text/plain avoids a CORS preflight round-trip on slow networks
     return call(path, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify(body) });
   }
-  var lastAd = 0, adc = null;
+  var lastAd = 0;
   window.Hub = {
     inTelegram: !!init,
     me: function () { return init ? post("/api/me") : Promise.reject("no-tg"); },
@@ -36,9 +36,10 @@
     haptic: function (t) { try { tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t || "light"); } catch (e) {} },
     back: function (url) { if (tg && tg.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(function () { location.href = url; }); } },
     interstitial: function () {
-      if (!init || !window.Adsgram || Date.now() - lastAd < 90000) return;
+      // Monetag in-app interstitial, at most once every 90s, only inside Telegram
+      if (!init || typeof window.show_11994091 !== "function" || Date.now() - lastAd < 90000) return;
       lastAd = Date.now();
-      try { adc = adc || Adsgram.init({ blockId: "int-52857" }); adc.show().catch(function () {}); } catch (e) {}
+      try { window.show_11994091({ type: "inApp", inAppSettings: { frequency: 1, capping: 0.1, interval: 90, timeout: 0, everyPage: false } }).catch(function () {}); } catch (e) {}
     }
   };
 })();
