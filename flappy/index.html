@@ -181,7 +181,7 @@
         var IN_TG = false; try { IN_TG = !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData); } catch (e) {}
         var ADS = window.AndroidAds || makeAdsgram() || (IN_TG ? null : makeSmartlink()), deaths = 0, doubled = false, rewardBtn = null;
         function rewardReady() { try { return !!(ADS && ADS.rewardedReady()); } catch (e) { return false; } }
-        window.onRewarded = function () { if (!doubled) { save.coins += runCoins; runCoins *= 2; doubled = true; persist(); sfx.score(); } };
+        window.onRewarded = function () { if (!doubled) { var add = runCoins > 0 ? runCoins : 10; save.coins += add; runCoins += add; doubled = true; persist(); sfx.score(); try { if (window.Hub) Hub.submit("flappy", 0, add); } catch (e) {} } };
         window.onRewardFailed = function () { shopMsg = "No ad right now, try later"; shopMsgT = 1.6; };
         function tapAt(cx, cy) {
           if (state === "dead" && rewardBtn && time - deadAt > 0.4) {
@@ -539,7 +539,7 @@
             var since = time - deadAt;
             var e = Math.min(1, since / 0.35), ease = 1 - Math.pow(1 - e, 3);
             ctx.save(); ctx.globalAlpha = ease; ctx.translate(0, (1 - ease) * 40);
-            var showRw = runCoins > 0 && !doubled && rewardReady();
+            var showRw = !doubled && rewardReady();
             var cw = Math.min(280, worldW - 40), ch = showRw ? 300 : 250, x = cx - cw / 2, y = PLAY_H / 2 - ch / 2;
             bigText("Game Over", cx, y - 34, Math.min(46, worldW / 8), "#ff8a3d");
             ctx.fillStyle = "rgba(0,0,0,0.18)"; rr(x, y + 6, cw, ch, 20); ctx.fill();
@@ -567,10 +567,10 @@
             if (showRw) {
               var rw = cw - 48, rh = 40, rx = cx - rw / 2, ry = y + 178;
               ctx.fillStyle = "#ffb703"; rr(rx, ry, rw, rh, 20); ctx.fill(); ctx.strokeStyle = "#8a5a00"; ctx.lineWidth = 3; ctx.stroke();
-              ctx.fillStyle = "#3a2a10"; ctx.font = "800 15px " + FONT; ctx.fillText("▶ Watch ad: 2x coins", cx, ry + rh / 2 + 1);
+              ctx.fillStyle = "#3a2a10"; ctx.font = "800 15px " + FONT; ctx.fillText(runCoins > 0 ? "▶ Watch ad: 2x coins" : "▶ Watch ad: +10 coins", cx, ry + rh / 2 + 1);
               rewardBtn = [rx, ry, rw, rh];
             } else if (doubled) {
-              ctx.fillStyle = "#2d7a10"; ctx.font = "800 15px " + FONT; ctx.fillText("Coins doubled!", cx, y + 196);
+              ctx.fillStyle = "#2d7a10"; ctx.font = "800 15px " + FONT; ctx.fillText("Reward added!", cx, y + 196);
             }
             var bw = cw - 48, bh = 56, bx = cx - bw / 2, by = y + ch - bh - 22;
             var ready = since >= 0.6;
