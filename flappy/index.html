@@ -163,21 +163,21 @@
           if (!rc) return null;
           return {
             rewardedReady: function () { return true; },
-            showRewarded: function () { rc.show().then(function (r) { if (r && r.done) window.onRewarded(); }).catch(function () { smartReward(); }); },
+            showRewarded: function () { rc.show().then(function (r) { if (r && r.done) window.onRewarded(); }).catch(function () { window.onRewardFailed(); }); },
             showInterstitial: function () { if (ic) ic.show().catch(function () {}); }
           };
         }
         var SMARTLINK = "https://uplcm.com/4/11989190";
         function openSmart() {
-          try { if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData && Telegram.WebApp.openLink) { Telegram.WebApp.openLink(SMARTLINK); return; } } catch (e) {}
-          var w = null; try { w = window.open(SMARTLINK, "_blank"); } catch (e) {}
+                    var w = null; try { w = window.open(SMARTLINK, "_blank"); } catch (e) {}
           if (!w && location.search.indexOf("app=android") < 0) { try { location.href = SMARTLINK; } catch (e) {} }
         }
         function smartReward() { openSmart(); setTimeout(function () { window.onRewarded(); }, 1500); }
         function makeSmartlink() {
           return { rewardedReady: function () { return true; }, showRewarded: smartReward, showInterstitial: function () {} };
         }
-        var ADS = window.AndroidAds || makeAdsgram() || makeSmartlink(), deaths = 0, doubled = false, rewardBtn = null;
+        var IN_TG = false; try { IN_TG = !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData); } catch (e) {}
+        var ADS = window.AndroidAds || makeAdsgram() || (IN_TG ? null : makeSmartlink()), deaths = 0, doubled = false, rewardBtn = null;
         function rewardReady() { try { return !!(ADS && ADS.rewardedReady()); } catch (e) { return false; } }
         window.onRewarded = function () { if (!doubled) { save.coins += runCoins; runCoins *= 2; doubled = true; persist(); sfx.score(); } };
         window.onRewardFailed = function () { shopMsg = "No ad right now, try later"; shopMsgT = 1.6; };
