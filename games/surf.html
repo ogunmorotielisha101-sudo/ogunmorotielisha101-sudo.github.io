@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Wave Surf</title><script src="https://telegram.org/js/telegram-web-app.js"></script><script src="https://sad.adsgram.ai/js/sad.min.js"></script><script src="hub.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden;background:#1c8fd6;font-family:system-ui,sans-serif;color:#fff;touch-action:none;user-select:none}
+canvas{display:block;position:fixed;inset:0}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 14px;font-weight:800;text-shadow:0 2px 3px rgba(0,0,0,.4);pointer-events:none}
+#hud a{pointer-events:auto;color:#fff;text-decoration:none}
+#ov{position:fixed;inset:0;background:rgba(0,30,60,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+#ov h1{font-size:34px}#ov .btn{border:0;border-radius:14px;padding:14px 30px;font-size:18px;font-weight:700;background:#ffcc33;color:#3a2a00}#ov .ghost{background:rgba(255,255,255,.18);color:#fff}
+.hide{display:none!important}</style></head><body>
+<canvas id="c"></canvas>
+<div id="hud"><a href="index.html">‹ Games</a><span id="hearts">❤️❤️❤️</span><span>⚡<span id="bo">3</span></span><span><span id="d">0</span> m</span></div>
+<div id="ov"><h1>🏄 Wave Surf</h1><p id="msg">Hold left or right side to steer. Dodge rocks and buoys, grab coins and ⚡. Double-tap to boost. Don't let the kraken catch you!</p><button class="btn" id="go">Surf</button><button class="btn ghost" onclick="location.href='index.html'">All games</button></div>
+<script>
+Hub.back("index.html");
+var c=document.getElementById("c"),x=c.getContext("2d"),W,H,dpr=Math.min(devicePixelRatio||1,2);
+function size(){W=innerWidth;H=innerHeight;c.width=W*dpr;c.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0);}size();addEventListener("resize",size);
+var best=+localStorage.getItem("surfBest")||0;
+var P,obs,dist,speed,lives,boost,boostT,inv,coins,alive=false,steer=0,kr,t0,wav=[];
+for(var i=0;i<40;i++)wav.push({x:Math.random(),y:Math.random()*2000,l:10+Math.random()*20});
+function reset(){P={x:W/2,y:H*.32,vx:0};obs=[];dist=0;speed=4.2;lives=3;boost=3;boostT=0;inv=0;coins=0;kr=null;t0=0;alive=true;document.getElementById("ov").classList.add("hide");hud();}
+function hud(){document.getElementById("hearts").textContent="❤️".repeat(lives)+"🤍".repeat(3-lives);document.getElementById("bo").textContent=boost;document.getElementById("d").textContent=Math.floor(dist);}
+var kinds=[{k:"rock",r:20,w:5},{k:"buoy",r:13,w:3},{k:"island",r:42,w:1.2},{k:"coin",r:11,w:4},{k:"bolt",r:12,w:.5},{k:"heart",r:12,w:.25},{k:"ramp",r:22,w:.6}];
+function spawn(y){var tot=0;kinds.forEach(function(k){tot+=k.w;});var r=Math.random()*tot,k;for(var i=0;i<kinds.length;i++){r-=kinds[i].w;if(r<=0){k=kinds[i];break;}}
+ if(k.k=="coin"){var bx=30+Math.random()*(W-60);for(var j=0;j<5;j++)obs.push({k:"coin",r:11,x:bx,y:y+j*30});return;}
+ obs.push({k:k.k,r:k.r,x:k.r+Math.random()*(W-2*k.r),y:y,ph:Math.random()*6});}
+var spawnAcc=0;
+function update(dt){if(!alive)return;t0+=dt;var sp=speed*(boostT>0?1.8:1)*(P.air>0?1.3:1);
+ P.vx+=steer*0.9*dt;P.vx*=Math.pow(.86,dt);P.x+=P.vx*dt;if(P.x<16){P.x=16;P.vx=0}if(P.x>W-16){P.x=W-16;P.vx=0}
+ dist+=sp*dt/10;speed=Math.min(9.5,4.2+dist/400);if(boostT>0)boostT-=dt;if(inv>0)inv-=dt;if(P.air>0)P.air-=dt;
+ spawnAcc+=sp*dt;var gap=Math.max(55,120-dist/30);while(spawnAcc>gap){spawnAcc-=gap;spawn(H+60);}
+ wav.forEach(function(w){w.y-=sp*dt;if(w.y<-30)w.y+=H+60;});
+ for(var i=obs.length-1;i>=0;i--){var o=obs[i];o.y-=sp*dt;if(o.y<-80){obs.splice(i,1);continue;}
+  var dx=o.x-P.x,dy=o.y-P.y,rr=o.r+12;if(dx*dx+dy*dy<rr*rr){
+   if(o.k=="coin"){coins++;obs.splice(i,1);Hub.haptic();}
+   else if(o.k=="bolt"){boost=Math.min(5,boost+1);obs.splice(i,1);}
+   else if(o.k=="heart"){lives=Math.min(3,lives+1);obs.splice(i,1);}
+   else if(o.k=="ramp"){P.air=40;inv=Math.max(inv,40);dist+=15;}
+   else if(inv<=0&&!(P.air>0)){hit();if(!alive)return;}
+  }}
+ // kraken appears after 600m, chases from top
+ if(dist>600&&!kr)kr={x:P.x,y:-120};
+ if(kr){var ks=boostT>0?-1.4:(.35+dist/6000);kr.y+=ks*dt;kr.y=Math.max(-160,Math.min(kr.y,P.y));kr.x+=(P.x-kr.x)*.03*dt;
+  if(P.y-kr.y<40&&Math.abs(kr.x-P.x)<50){lives=0;end("The kraken got you!");return;}}
+ hud();}
+function hit(){lives--;inv=60;Hub.haptic("heavy");if(kr)kr.y+=40;if(lives<=0)end("Wiped out!");}
+function end(why){alive=false;hud();var score=Math.floor(dist),nb=score>best;if(nb){best=score;localStorage.setItem("surfBest",best);}
+ var cn=coins+Math.floor(score/100);document.querySelector("#ov h1").textContent=nb?"🏆 New best!":why;
+ document.getElementById("msg").textContent=score+" m · "+coins+" 🪙 picked up · +"+cn+" coins · best "+best+" m";
+ document.getElementById("go").textContent="Surf again";document.getElementById("ov").classList.remove("hide");
+ Hub.submit("surf",score,cn).then(function(r){if(r&&r.ok)document.getElementById("msg").textContent=score+" m · +"+cn+" coins · "+r.coins+" total"+(r.rank?" · Rank #"+r.rank:"");});
+ Hub.interstitial();}
+function draw(){var g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,"#1aa3e8");g.addColorStop(1,"#0b5fa8");x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.strokeStyle="rgba(255,255,255,.35)";x.lineWidth=2;wav.forEach(function(w){var wx=w.x*W;x.beginPath();x.moveTo(wx,w.y);x.quadraticCurveTo(wx+w.l/2,w.y-4,wx+w.l,w.y);x.stroke();});
+ obs.forEach(function(o){x.save();x.translate(o.x,o.y);
+  if(o.k=="rock"){x.fillStyle="#6d6d6d";x.beginPath();x.moveTo(-20,8);x.lineTo(-12,-14);x.lineTo(6,-18);x.lineTo(20,2);x.lineTo(10,14);x.lineTo(-10,15);x.fill();x.fillStyle="#8a8a8a";x.beginPath();x.moveTo(-12,-14);x.lineTo(6,-18);x.lineTo(2,-4);x.fill();x.strokeStyle="rgba(255,255,255,.6)";x.beginPath();x.ellipse(0,6,24,10,0,0,Math.PI);x.stroke();}
+  else if(o.k=="buoy"){x.fillStyle="#e53935";x.beginPath();x.arc(0,0,13,0,7);x.fill();x.fillStyle="#fff";x.fillRect(-13,-3,26,6);}
+  else if(o.k=="island"){x.fillStyle="#f4d58d";x.beginPath();x.ellipse(0,0,44,30,0,0,7);x.fill();x.fillStyle="#2e7d32";x.beginPath();x.arc(-8,-8,14,0,7);x.arc(10,-4,11,0,7);x.fill();x.fillStyle="#6d4c41";x.fillRect(-2,-6,4,14);}
+  else if(o.k=="coin"){x.fillStyle="#ffc107";x.beginPath();x.arc(0,0,10,0,7);x.fill();x.fillStyle="#fff59d";x.beginPath();x.arc(-3,-3,4,0,7);x.fill();}
+  else if(o.k=="bolt"){x.font="22px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText("⚡",0,0);}
+  else if(o.k=="heart"){x.font="22px sans-serif";x.textAlign="center";x.textBaseline="middle";x.fillText("❤️",0,0);}
+  else if(o.k=="ramp"){x.fillStyle="#8d6e63";x.fillRect(-22,-8,44,16);x.fillStyle="#ffeb3b";x.fillRect(-22,-8,44,4);}
+  x.restore();});
+ // surfer
+ if(!(inv>0&&Math.floor(inv/5)%2&&!(P.air>0))){x.save();x.translate(P.x,P.y);var sc=P.air>0?1.25:1;x.scale(sc,sc);x.rotate(Math.max(-.5,Math.min(.5,P.vx*.08)));
+  x.fillStyle="rgba(255,255,255,.5)";x.beginPath();x.moveTo(-8,-18);x.lineTo(0,-34-(boostT>0?14:0));x.lineTo(8,-18);x.fill();
+  x.fillStyle="#ff7043";x.beginPath();x.ellipse(0,0,8,22,0,0,7);x.fill();x.fillStyle="#fff";x.fillRect(-1,-20,2,40);
+  x.fillStyle="#3949ab";x.beginPath();x.arc(0,2,7,0,7);x.fill();x.fillStyle="#ffcc80";x.beginPath();x.arc(0,-6,5,0,7);x.fill();x.restore();}
+ if(kr){x.save();x.translate(kr.x,kr.y);x.fillStyle="#7b1fa2";for(var i=-3;i<=3;i++){x.beginPath();x.moveTo(i*12,10);x.quadraticCurveTo(i*18+Math.sin(Date.now()/150+i)*10,40,i*14,70);x.lineWidth=8;x.strokeStyle="#8e24aa";x.stroke();}
+  x.beginPath();x.ellipse(0,0,44,34,0,0,7);x.fill();x.fillStyle="#fff";x.beginPath();x.arc(-14,4,8,0,7);x.arc(14,4,8,0,7);x.fill();x.fillStyle="#000";x.beginPath();x.arc(-14,6,4,0,7);x.arc(14,6,4,0,7);x.fill();x.restore();}
+ if(boostT>0){x.fillStyle="rgba(255,235,59,.12)";x.fillRect(0,0,W,H);}}
+var last=0;function loop(t){requestAnimationFrame(loop);var dt=Math.min(3,(t-last)/16.67||1);last=t;if(P)update(dt);if(P)draw();else{P={x:W/2,y:H*.32,vx:0};obs=[];draw();}}requestAnimationFrame(loop);
+function doBoost(){if(alive&&boost>0&&boostT<=0){boost--;boostT=90;Hub.haptic("medium");hud();}}
+var touches={},lastTap=0;
+addEventListener("touchstart",function(e){if(!alive)return;for(var i=0;i<e.changedTouches.length;i++){var tt=e.changedTouches[i];touches[tt.identifier]=tt.clientX<W/2?-1:1;}
+ var now=Date.now();if(now-lastTap<280)doBoost();lastTap=now;calc();},{passive:true});
+addEventListener("touchend",function(e){for(var i=0;i<e.changedTouches.length;i++)delete touches[e.changedTouches[i].identifier];calc();},{passive:true});
+function calc(){var s=0;for(var k in touches)s+=touches[k];steer=Math.max(-1,Math.min(1,s));}
+var keys={};addEventListener("keydown",function(e){keys[e.key]=1;steer=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0);if(e.key==" "||e.key=="f")alive?doBoost():reset();});
+addEventListener("keyup",function(e){keys[e.key]=0;steer=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0);});
+document.getElementById("go").onclick=function(e){e.stopPropagation();reset();};
+</script></body></html>
