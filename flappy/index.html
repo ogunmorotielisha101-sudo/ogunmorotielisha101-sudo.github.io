@@ -155,7 +155,8 @@
         var ADSGRAM_REWARD_BLOCK = "52856", ADSGRAM_INTER_BLOCK = "int-52857";
         try { if (window.Telegram && Telegram.WebApp) { Telegram.WebApp.ready(); Telegram.WebApp.expand(); if (Telegram.WebApp.disableVerticalSwipes) Telegram.WebApp.disableVerticalSwipes(); } } catch (e) {}
         function makeAdsgram() {
-          if (!window.Adsgram || ADSGRAM_REWARD_BLOCK.indexOf("REPLACE") === 0) return null;
+          var inTg = false; try { inTg = !!(window.Telegram && Telegram.WebApp && Telegram.WebApp.initData); } catch (e) {}
+          if (!inTg || !window.Adsgram || ADSGRAM_REWARD_BLOCK.indexOf("REPLACE") === 0) return null;
           var rc = null, ic = null;
           try { rc = window.Adsgram.init({ blockId: ADSGRAM_REWARD_BLOCK }); } catch (e) {}
           try { if (ADSGRAM_INTER_BLOCK.indexOf("REPLACE") !== 0) ic = window.Adsgram.init({ blockId: ADSGRAM_INTER_BLOCK }); } catch (e) {}
