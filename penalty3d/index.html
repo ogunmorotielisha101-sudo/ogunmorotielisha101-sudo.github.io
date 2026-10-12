@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Penalty King 3D</title>
+<script src="https://telegram.org/js/telegram-web-app.js" async onload="try{Telegram.WebApp.ready();Telegram.WebApp.expand();Telegram.WebApp.disableVerticalSwipes&&Telegram.WebApp.disableVerticalSwipes();}catch(e){}"></script>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#04070d;touch-action:none;-webkit-user-select:none;user-select:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff}
+#gl,#fx{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#fx{pointer-events:none}
+#hud{position:fixed;left:0;right:0;top:0;padding:10px 14px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,0));pointer-events:none}
+#hud .l b{font-size:15px;display:block}#hud .l span{font-size:12px;opacity:.75}
+#dots{display:flex;gap:8px}#dots i{width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,.25);display:block;box-sizing:border-box}
+#dots i.g{background:#2ecc71}#dots i.m{background:#e74c3c}#dots i.c{border:2px solid #fff}
+#hud .r{text-align:right}#hud .r b{font-size:22px;display:block}#hud .r span{font-size:11px;opacity:.7}
+#msg{position:fixed;left:0;right:0;top:36%;text-align:center;pointer-events:none;opacity:0}
+#msg h2{margin:0;font-size:50px;font-weight:900;letter-spacing:1px;text-shadow:0 4px 14px rgba(0,0,0,.7),0 0 2px #000}
+#msg p{margin:4px 0 0;font-weight:700;font-size:17px;text-shadow:0 2px 6px #000}
+#msg.show{animation:pop .45s cubic-bezier(.2,1.6,.4,1) forwards}
+#msg.good h2{color:#7CFC9A}
+@keyframes pop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+#hint{position:fixed;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom));text-align:center;font-weight:700;font-size:14px;text-shadow:0 2px 6px #000;pointer-events:none}
+#rep{position:fixed;top:70px;left:14px;background:#e01b24;padding:4px 10px;border-radius:4px;font-weight:900;font-size:13px;letter-spacing:2px;display:none;pointer-events:none}
+#ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(0,50,22,.75),rgba(0,10,5,.94));text-align:center;padding:24px;box-sizing:border-box;z-index:5}
+#ov h1{font-size:44px;margin:0 0 6px;letter-spacing:1px;text-shadow:0 3px 0 rgba(0,0,0,.4)}
+#ov h1 span{color:#7CFC9A}
+#ov p{opacity:.92;max-width:330px;line-height:1.45;margin:6px 0}
+#ov button{margin-top:22px;font-size:20px;font-weight:800;padding:14px 46px;border:0;border-radius:40px;background:linear-gradient(#22c25a,#139a43);color:#fff;box-shadow:0 6px 0 #0b5e28;letter-spacing:.5px}
+#ov button:active{transform:translateY(4px);box-shadow:0 2px 0 #0b5e28}
+.tag{font-size:12px;opacity:.6;margin-top:18px}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#04070d;z-index:9;font-weight:700;letter-spacing:1px}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas><canvas id="fx"></canvas>
+<div id="hud" style="display:none"><div class="l"><b id="vs"></b><span id="st"></span></div><div id="dots"></div><div class="r"><b id="sc">0</b><span id="bs"></span></div></div>
+<div id="msg"><h2></h2><p></p></div><div id="hint"></div><div id="rep">REPLAY</div>
+<div id="ov"></div><div id="load">LOADING STADIUM…</div>
+<script type="module" src="game.js?v=1"></script>
+</body>
+</html>
