@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Penalty King 3D</title>
@@ -43,6 +44,6 @@ html,body{margin:0;height:100%;overflow:hidden;background:#04070d;touch-action:n
 <div id="hud" style="display:none"><div class="l"><b id="vs"></b><span id="st"></span></div><div id="dots"></div><div class="r"><b id="sc">0</b><span id="bs"></span></div></div>
 <div id="msg"><h2></h2><p></p></div><div id="hint"></div><div id="rep">REPLAY</div>
 <div id="ov"></div><div id="load">LOADING STADIUM…</div>
-<script type="module" src="game.js?v=7"></script>
+<script>(function(){function go(v){var s=document.createElement("script");s.type="module";s.src="game.js?v="+v;document.body.appendChild(s);}fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){go(j.v)}).catch(function(){go("8")});})();</script>
 </body>
 </html>
