@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Hoop Kings 3D</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#05060c;touch-action:none;-webkit-user-select:none;user-select:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff}
+#gl,#fx{position:fixed;inset:0;width:100vw;height:100vh;display:block}#fx{pointer-events:none}
+#hud{position:fixed;left:0;right:0;top:0;padding:10px 14px 22px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,0));pointer-events:none}
+#hud .c{text-align:center}#hud .c b{font-size:30px;display:block;line-height:1}#hud .c span{font-size:11px;opacity:.7;letter-spacing:2px}
+#tm{font-size:24px;font-weight:900;background:rgba(0,0,0,.5);border:2px solid #4fc3f7;border-radius:12px;padding:3px 10px;min-width:38px;text-align:center}#tm.low{border-color:#ff4d4d;color:#ff4d4d;animation:bl .5s infinite alternate}
+@keyframes bl{to{opacity:.55}}
+#ml{font-weight:900;font-size:16px;color:#7CFC9A;text-align:right}#ml.fire{color:#ff8a2a;text-shadow:0 0 12px #ff5a00}#bs{font-size:10px;opacity:.6;display:block;text-align:right}
+#msg{position:fixed;left:0;right:0;top:30%;text-align:center;pointer-events:none;opacity:0}
+#msg h2{margin:0;font-size:52px;font-weight:900;font-style:italic;letter-spacing:1px;text-shadow:0 4px 14px rgba(0,0,0,.7),0 0 2px #000}
+#msg p{margin:4px 0 0;font-weight:800;font-size:18px;text-shadow:0 2px 6px #000;color:#ffd54f}
+#msg.show{animation:pop .9s cubic-bezier(.2,1.6,.4,1) forwards}#msg.good h2{color:#7CFC9A}#msg.fire h2{color:#ff8a2a;text-shadow:0 0 24px #ff5a00,0 4px 10px #000}
+@keyframes pop{0%{opacity:0;transform:scale(.5)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}
+#hint{position:fixed;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom));text-align:center;font-weight:700;font-size:14px;text-shadow:0 2px 6px #000;pointer-events:none}
+#ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 35%,rgba(120,40,0,.45),rgba(3,3,8,.93) 72%);text-align:center;padding:60px 20px 30px;box-sizing:border-box;z-index:5;overflow-y:auto}
+.top{position:fixed;top:10px;left:0;right:0;display:flex;justify-content:center;gap:10px;pointer-events:none}
+.chip{background:rgba(0,0,0,.55);border:1px solid rgba(255,160,60,.5);padding:6px 14px;border-radius:30px;font-size:15px}.chip b{color:#ffb74d}
+.bb{font-size:60px;animation:bounce 1s cubic-bezier(.3,0,.7,1) infinite alternate;filter:drop-shadow(0 0 18px rgba(255,120,30,.8))}
+@keyframes bounce{from{transform:translateY(-14px) rotate(-20deg)}to{transform:translateY(6px) rotate(20deg)}}
+h1{font-size:40px;margin:0 0 6px}
+h1.logo{font-size:60px;line-height:.9;font-weight:900;font-style:italic;margin:4px 0 0;padding:0 12px;background:linear-gradient(180deg,#fff 30%,#ffd9b0);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 5px 0 #7a2a00) drop-shadow(0 10px 18px rgba(0,0,0,.6))}
+h1.logo span{font-size:76px;background:linear-gradient(180deg,#ffe082,#ff8a2a 60%,#e65100);-webkit-background-clip:text;color:transparent}
+.lead{opacity:.85;font-size:15px;margin:10px 0}
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:340px;margin:6px 0 4px}.rules div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:8px;font-size:12px}
+#ov button{margin-top:18px;font-size:20px;font-weight:800;padding:14px 46px;border:0;border-radius:40px;color:#fff;min-width:240px}
+#ov button.big{background:linear-gradient(180deg,#ffb04a,#ff6d00 60%,#e65100);box-shadow:0 6px 0 #8a3300,0 10px 26px rgba(255,110,0,.4);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.04)}}
+#ov button.alt{background:rgba(255,255,255,.14);box-shadow:0 6px 0 rgba(0,0,0,.35);margin-top:12px}
+#ov button:active{transform:translateY(4px)}
+.tag{font-size:12px;opacity:.55;margin-top:18px}
+.burst{font-size:70px}.big-score{font-size:84px;font-weight:900;font-style:italic;color:#ffb74d;text-shadow:0 0 24px rgba(255,120,0,.6);line-height:1}
+.stats{display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap;justify-content:center}.stats span{background:rgba(255,255,255,.08);padding:6px 12px;border-radius:12px;font-size:13px}
+.bonus{color:#ffd54f;font-weight:800;font-size:18px}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#05060c;z-index:9;font-weight:700;letter-spacing:1px}
+</style></head><body>
+<canvas id="gl"></canvas><canvas id="fx"></canvas>
+<div id="hud" style="display:none"><div id="tm">60</div><div class="c"><b id="sc">0</b><span>POINTS</span></div><div><div id="ml">x1</div><span id="bs"></span></div></div>
+<div id="msg"><h2></h2><p></p></div><div id="hint"></div>
+<div id="ov"></div><div id="load">WARMING UP…</div>
+<script>(function(){function go(v){var s=document.createElement("script");s.src="game.js?v="+v;document.body.appendChild(s);}fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){go(j.v)}).catch(function(){go("1")});})();</script>
+</body></html>
