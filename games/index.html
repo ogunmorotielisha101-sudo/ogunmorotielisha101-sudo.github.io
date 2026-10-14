@@ -22,9 +22,9 @@ ol{list-style:none;background:rgba(255,255,255,.06);border-radius:14px;padding:6
 <a class="card feat" href="../penalty3d/"><div class="ico" style="background:linear-gradient(160deg,#14a64a,#0b3d1c);box-shadow:0 0 18px rgba(60,240,120,.45)">⚽</div><div><span class="new">NEW</span><h2>Penalty King 3D</h2><p>32 nations, real keepers. Curl it in and lift the cup.</p><div class="best" id="b-penalty"></div></div></a>
 <a class="card" href="../flappy/"><div class="ico" style="background:#4ec0ca">🐦</div><div><h2>Flappy Bird</h2><p>Tap to fly through the pipes.</p><div class="best" id="b-flappy"></div></div></a>
 <a class="card" href="glider.html"><div class="ico" style="background:linear-gradient(160deg,#7b3fa0,#f0717a)">✈️</div><div><h2>Sky Glider</h2><p>Hold to climb, release to dive. Grab the stars.</p><div class="best" id="b-glider"></div></div></a>
-<div class="card soon"><div class="ico" style="background:linear-gradient(160deg,#ff8f00,#c43e00)">🏀</div><div><h2>Basketball</h2><p>Coming soon…</p></div></div>
+<a class="card feat" href="../hoops/" style="background:linear-gradient(160deg,rgba(255,140,30,.25),rgba(255,255,255,.06));border-color:rgba(255,140,30,.5)"><div class="ico" style="background:linear-gradient(160deg,#ff8f00,#c43e00);box-shadow:0 0 18px rgba(255,140,30,.5)">🏀</div><div><span class="new">NEW</span><h2>Hoop Kings 3D</h2><p>60-second shootout. Get ON FIRE 🔥</p><div class="best" id="b-hoops"></div></div></a>
 <h3>🏆 Leaderboard</h3>
-<div class="tabs"><button data-g="penalty" class="on">Penalty</button><button data-g="flappy">Flappy</button><button data-g="glider">Sky Glider</button></div>
+<div class="tabs"><button data-g="penalty" class="on">Penalty</button><button data-g="hoops">Hoops</button><button data-g="flappy">Flappy</button><button data-g="glider">Sky Glider</button></div>
 <ol id="top"><li>Loading…</li></ol>
 <div class="invite">👥 Invite friends: you get <b>100 coins</b> for each one who joins.<button id="share">Share my invite link</button></div>
 <script>
@@ -32,7 +32,7 @@ var link = "https://t.me/Flappy2026Bot";
 function load(){ Hub.me().then(function(m){ document.getElementById("hi").textContent="Hi "+m.name+"! Play, earn coins, top the leaderboard.";
   document.getElementById("coins").textContent=m.coins; document.getElementById("inv").textContent=m.invited; link=m.invite;
   var d=document.getElementById("daily"); d.disabled=!m.canDaily; d.textContent=m.canDaily?"🎁 Claim daily bonus (+50)":"✅ Daily bonus claimed";
-  ["penalty","flappy","glider"].forEach(function(g){ if(m.best[g]) document.getElementById("b-"+g).textContent="Your best: "+m.best[g]; });
+  ["penalty","hoops","flappy","glider"].forEach(function(g){ if(m.best[g]) document.getElementById("b-"+g).textContent="Your best: "+m.best[g]; });
  }).catch(function(e){ var d=document.getElementById("daily"); if(!Hub.inTelegram){ d.disabled=true; d.textContent="Open in Telegram to earn coins"; } else { d.disabled=false; d.textContent="⚠️ Server busy, tap to retry"; d.onclick=function(){ d.onclick=claim; load(); }; } }); }
 function claim(){ var d=document.getElementById("daily"); d.disabled=true; Hub.daily().then(function(r){ Hub.haptic("medium"); alert(r.msg); load(); }).catch(function(){ d.disabled=false; alert("Couldn't reach the server. Please try again."); }); }
 document.getElementById("daily").onclick=claim;
@@ -40,7 +40,7 @@ function showTop(g){ document.querySelectorAll(".tabs button").forEach(function(
  Hub.top(g).then(function(r){ var o=document.getElementById("top"); o.innerHTML=r.top.length?"":"<li>No scores yet. Be first!</li>";
   r.top.forEach(function(e,i){ var li=document.createElement("li"); li.innerHTML="<span></span><b></b>"; li.firstChild.textContent=(["🥇","🥈","🥉"][i]||(i+1)+".")+" "+e.name; li.lastChild.textContent=e.score; o.appendChild(li); }); }).catch(function(){ document.getElementById("top").innerHTML="<li>Can't reach the server. <a href=\"#\" onclick=\"showTop('"+g+"');return false\" style=\"color:#4fc3f7\">Retry</a></li>"; }); }
 document.querySelectorAll(".tabs button").forEach(function(b){ b.onclick=function(){showTop(b.dataset.g);}; });
-document.getElementById("share").onclick=function(){ var u="https://t.me/share/url?url="+encodeURIComponent(link)+"&text="+encodeURIComponent("Play Penalty King 3D, Flappy Bird and Sky Glider with me on Arcade Kings! ⚽🎮");
+document.getElementById("share").onclick=function(){ var u="https://t.me/share/url?url="+encodeURIComponent(link)+"&text="+encodeURIComponent("Play Penalty King 3D, Hoop Kings 3D, Flappy Bird and Sky Glider with me on Arcade Kings! ⚽🏀🎮");
  if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.openTelegramLink) Telegram.WebApp.openTelegramLink(u); else window.open(u); };
 load(); showTop("penalty");
 </script>
